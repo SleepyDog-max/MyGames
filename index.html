@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proposition Puzzle</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
+            color: #333;
+        }
+        h1 {
+            color: #ff6f61;
+            text-shadow: 1px 1px 2px #aaa;
+        }
+        .card {
+            border: 2px solid #ffcc5c;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px auto;
+            background: #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            max-width: 90%;
+            font-size: 18px;
+            color: #2a9d8f;
+        }
+        .option {
+            padding: 12px;
+            margin: 8px;
+            background: #88d8b0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            color: white;
+            transition: transform 0.2s;
+        }
+        .option:hover {
+            background: #56c596;
+            transform: scale(1.05);
+        }
+        #feedback {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            background: #f4a261;
+            color: white;
+            font-weight: bold;
+        }
+        button {
+            padding: 12px 25px;
+            margin: 10px;
+            font-size: 18px;
+            background: #ff6f61;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #e63946;
+        }
+        #summary {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            text-align: left;
+        }
+        #summary h2 {
+            color: #2a9d8f;
+        }
+        #summary p {
+            margin: 5px 0;
+            color: #264653;
+        }
+    </style>
+</head>
+<body>
+    <h1>Proposition Puzzle</h1>
+    <div id="proposition1" class="card"></div>
+    <div id="proposition2" class="card"></div>
+    <div id="options">
+        <div class="option" onclick="checkAnswer('Entailment')">Entailment</div>
+        <div class="option" onclick="checkAnswer('Equivalence')">Equivalence</div>
+        <div class="option" onclick="checkAnswer('Contrariety')">Contrariety</div>
+        <div class="option" onclick="checkAnswer('Contradiction')">Contradiction</div>
+        <div class="option" onclick="checkAnswer('Compatibility')">Compatibility</div>
+    </div>
+    <div id="feedback"></div>
+    <button id="nextButton" onclick="nextPair()">Next Pair</button>
+    <button id="restartButton" onclick="restartGame()" style="display: none;">Restart Game</button>
+    <p>Score: <span id="score">0</span>/10</p>
+    <div id="summary"></div>
+
+    <script>
+        const propositions = [
+            "All fish swim", "Some fish don’t swim", "No birds are mammals",
+            "All birds have feathers", "Some animals have feathers",
+            "It’s day outside", "The sun is shining", "It’s night outside",
+            "All squares are rectangles", "Some rectangles are not squares"
+        ];
+
+        const pairs = [
+            { p1: "All fish swim", p2: "Some fish don’t swim", relation: "Contradiction", explanation: "They can’t both be true and can’t both be false." },
+            { p1: "All birds have feathers", p2: "Some animals have feathers", relation: "Entailment", explanation: "If all birds have feathers, then some animals (birds) must have feathers." },
+            { p1: "It’s day outside", p2: "The sun is shining", relation: "Compatibility", explanation: "They can be true together, but don’t have to be (e.g., cloudy days)." },
+            { p1: "It’s day outside", p2: "It’s night outside", relation: "Contradiction", explanation: "One must be true and the other false." },
+            { p1: "All squares are rectangles", p2: "Some rectangles are not squares", relation: "Compatibility", explanation: "Both can be true; squares are rectangles, but not all rectangles are squares." },
+            { p1: "No birds are mammals", p2: "All birds have feathers", relation: "Compatibility", explanation: "Both can be true, as they address different properties." },
+            { p1: "Some fish don’t swim", p2: "Some animals have feathers", relation: "Compatibility", explanation: "These unrelated statements can coexist." },
+            { p1: "The sun is shining", p2: "It’s night outside", relation: "Contrariety", explanation: "They can’t both be true (sun shining implies day), but both can be false (cloudy day)." },
+            { p1: "All fish swim", p2: "All birds have feathers", relation: "Compatibility", explanation: "Both can be true; they’re about different subjects." },
+            { p1: "All squares are rectangles", p2: "All birds have feathers", relation: "Compatibility", explanation: "Both can be true independently." }
+        ];
+
+        let currentPairIndex = 0;
+        let score = 0;
+
+        function loadPair() {
+            if (currentPairIndex >= pairs.length) {
+                showSummary();
+                return;
+            }
+            const pair = pairs[currentPairIndex];
+            document.getElementById("proposition1").innerHTML = pair.p1;
+            document.getElementById("proposition2").innerHTML = pair.p2;
+            document.getElementById("feedback").innerHTML = "";
+            document.getElementById("nextButton").style.display = "inline";
+            document.getElementById("restartButton").style.display = "none";
+        }
+
+        function checkAnswer(selected) {
+            const pair = pairs[currentPairIndex];
+            if (selected === pair.relation) {
+                score++;
+                document.getElementById("feedback").innerHTML = `Correct! ${pair.explanation}`;
+            } else {
+                document.getElementById("feedback").innerHTML = `Wrong. The correct relation is ${pair.relation.toLowerCase()}. ${pair.explanation}`;
+            }
+            document.getElementById("score").innerHTML = score;
+        }
+
+        function nextPair() {
+            currentPairIndex++;
+            loadPair();
+        }
+
+        function showSummary() {
+            document.getElementById("options").style.display = "none";
+            document.getElementById("proposition1").style.display = "none";
+            document.getElementById("proposition2").style.display = "none";
+            document.getElementById("feedback").innerHTML = `Game Over! Final Score: ${score}/10`;
+            const summaryDiv = document.getElementById("summary");
+            summaryDiv.style.display = "block";
+            let summaryHTML = "<h2>Correct Answers & Explanations</h2>";
+            pairs.forEach((pair, index) => {
+                summaryHTML += `<p><strong>Pair ${index + 1}:</strong> "${pair.p1}" and "${pair.p2}" → ${pair.relation}<br>${pair.explanation}</p>`;
+            });
+            summaryDiv.innerHTML = summaryHTML;
+            document.getElementById("nextButton").style.display = "none";
+            document.getElementById("restartButton").style.display = "inline";
+        }
+
+        function restartGame() {
+            currentPairIndex = 0;
+            score = 0;
+            document.getElementById("score").innerHTML = score;
+            document.getElementById("options").style.display = "block";
+            document.getElementById("proposition1").style.display = "block";
+            document.getElementById("proposition2").style.display = "block";
+            document.getElementById("summary").style.display = "none";
+            loadPair();
+        }
+
+        // Start the game
+        loadPair();
+    </script>
+</body>
+</html>
